@@ -15,17 +15,17 @@ from insteon import InsteonConfiguration, InsteonMcp
 @click.option("--transport",
               default="sse",
               type=click.Choice(["stdio", "http", "sse", "streamable-http"]))
-@click.option("--server-host", default="localhost")
-@click.option("--server-port", default=8000)
+@click.option("--host", default="localhost")
+@click.option("--port", default=8000)
 def main(config: str, serial_port: str,
-         transport: Literal["stdio", "http", "sse", "streamable-http"],
-         server_host: str, server_port: int):
+         transport: Literal["stdio", "http", "sse",
+                            "streamable-http"], host: str, port: int):
     config = load_config(config)
     server = InsteonMcp(config,
                         serial_port,
                         transport=transport,
-                        server_host=server_host,
-                        server_port=server_port)
+                        host=host,
+                        server_port=port)
     server.run()
 
 

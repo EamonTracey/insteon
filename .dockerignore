@@ -1,17 +1,10 @@
-# Ignore environment and dependency folders
 venv/
 .venv/
 node_modules/
 src/web/node_modules/
-
-# Ignore build artifacts
 src/web/dist/
-
-# Ignore git and IDE metadata
 .git/
 .idea/
 .vscode/
-
-# Ignore OS-specific files
 .DS_Store
 Thumbs.db

@@ -3,10 +3,7 @@ services:
     build: .
     ports:
       - "443:443"
-    volumes:
-      - ./certs:/app/certs
-      - ./data:/app/data
-    devices: []
-    restart: always
     environment:
+      - MCP_HOST=http://host.docker.internal:8000/sse
+      - OLLAMA_HOST=http://host.docker.internal:11434
       - PYTHONUNBUFFERED=1

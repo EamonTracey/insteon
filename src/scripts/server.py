@@ -1,22 +1,56 @@
+from contextlib import asynccontextmanager
+import os
+import tempfile
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 import uvicorn
+import whisper
+
+from insteon_ import InsteonAgent
 
 DIST_DIR = "/dist"
 SSL_CERT = "/cert.pem"
 SSL_KEY = "/key.pem"
 
-app = FastAPI()
+model = whisper.load_model("small.en")
+agent = InsteonAgent("http://host.docker.internal:8000/sse",
+                     "gemma4",
+                     ollama_url="http://host.docker.internal:11434")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await agent.__aenter__()
+    try:
+        yield
+    finally:
+        await agent.__aexit__(None, None, None)
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.post("/execute")
 async def execute(audio: UploadFile = File(...)):
-    print(f"Received audio file: {audio.filename}, size: {audio.size} bytes")
+    prompt = await transcribe_audio(audio)
+    await agent.execute(prompt)
 
-    return {
-        "transcript": "This is a mock transcript. Audio received!",
-        "tool_calls": []
-    }
+    return {"transcript": prompt, "tool_calls": []}
+
+
+async def transcribe_audio(audio: UploadFile) -> str:
+    with tempfile.NamedTemporaryFile(delete=False,
+                                     suffix=".webm") as temp_audio:
+        contents = await audio.read()
+        temp_audio.write(contents)
+        temp_path = temp_audio.name
+
+    try:
+        result = model.transcribe(temp_path)
+        return result["text"].strip()
+    finally:
+        os.remove(temp_path)
 
 
 def main():

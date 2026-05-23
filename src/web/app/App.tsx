@@ -54,24 +54,15 @@ export default function App() {
                 audio: true,
             });
 
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : undefined;
-
-            const recorder = mimeType
-                ? new MediaRecorder(stream, {
-                      mimeType,
-                  })
-                : new MediaRecorder(stream);
-
+            const mimeType = 'audio/webm'
+            const recorder = new MediaRecorder(stream, { mimeType })
             chunksRef.current = [];
-
             recorder.ondataavailable = (event: BlobEvent) => {
                 if (event.data.size > 0) {
                     chunksRef.current.push(event.data);
                 }
             };
-
             recorder.start();
-
             mediaRecorderRef.current = recorder;
 
             setResult(null);
@@ -91,16 +82,12 @@ export default function App() {
         return new Promise((resolve, reject) => {
             recorder.onstop = () => {
                 try {
-                    const audioBlob = new Blob(chunksRef.current, {
-                        type: recorder.mimeType || 'audio/webm',
-                    });
-
+                    const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
                     resolve(audioBlob);
                 } catch (error) {
                     reject(error);
                 } finally {
                     recorder.stream.getTracks().forEach((track) => track.stop());
-
                     mediaRecorderRef.current = null;
                 }
             };

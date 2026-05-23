@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from fastmcp import Client
+import fastmcp
 import ollama
 
 SYSTEM_PROMPT = """You are a home automation controller. Your only job is to call tools to control devices.
@@ -28,26 +28,28 @@ EXAMPLES:
 
 class InsteonAgent:
 
-    def __init__(self, mcp_server_url: str, model: str):
-        self.mcp_server_url = mcp_server_url
-        self.model = model
+    def __init__(self, ollama_url: str, mcp_url: str, model: str):
+        self._ollama_url = ollama_url
+        self._mcp_url = mcp_url
+        self._model = model
 
-        self._client = None
+        self._ollama = None
+        self._mcp = None
         self._ollama_tools = None
         self._system_prompt = None
 
     async def __aenter__(self):
-        self._client = Client(self.mcp_server_url)
-        await self._client.__aenter__()
+        self._mcp = fastmcp.Client(self._mcp_url)
+        await self._mcp.__aenter__()
         await self._initialize()
         return self
 
     async def __aexit__(self, *args):
-        await self._client.__aexit__(*args)
+        await self._mcp.__aexit__(*args)
 
     async def execute(self, prompt: str) -> bool:
-        response = ollama.chat(
-            model=self.model,
+        response = self._ollama.chat(
+            model=self._model,
             messages=[
                 {
                     "role": "system",
@@ -63,7 +65,7 @@ class InsteonAgent:
 
         if response.message.tool_calls:
             await asyncio.gather(*[
-                self._client.call_tool(
+                self._mcp.call_tool(
                     tool_call.function.name,
                     tool_call.function.arguments,
                 ) for tool_call in response.message.tool_calls
@@ -72,14 +74,16 @@ class InsteonAgent:
         return response.message.tool_calls
 
     async def _initialize(self):
+        self._ollama = ollama.Client(host=self._ollama_url)
+
         # Retrieve the list of devices supported by the server.
-        resource = await self._client.read_resource("insteon://devices")
+        resource = await self._mcp.read_resource("insteon://devices")
         devices = json.loads(resource[0].text)
         devices = "\n".join(f" - {device}" for device in devices)
         self._system_prompt = SYSTEM_PROMPT.format(devices=devices)
 
         # Retrieve the tools supported by the server.
-        mcp_tools = await self._client.list_tools()
+        mcp_tools = await self._mcp.list_tools()
         self._ollama_tools = [{
             "type": "function",
             "function": {

@@ -14,11 +14,11 @@ class InsteonMcp:
                  serial_port: str,
                  transport: Literal["stdio", "http", "sse",
                                     "streamable-http"] = "sse",
-                 server_host: str = "localhost",
-                 server_port: int = 8000):
+                 host: str = "localhost",
+                 port: int = 8000):
         self._transport = transport
-        self._server_host = server_host
-        self._server_port = server_port
+        self._host = host
+        self._port = port
 
         controller = InsteonController(serial_port)
 
@@ -31,24 +31,34 @@ class InsteonMcp:
 
         @self._server.tool()
         def turn_on(device: str, level: int = 0xFF) -> str:
-            """Turn on a device at the given brightness level (0–255)."""
+            """Turn on a device at the given brightness level (0–255).
+
+            A level of 0 turns the device completely off.
+            A level of 127 turns the device on halfway.
+            A level of 255 turns the device completely on.
+            """
             controller.turn_on(config.get(device), level)
             return f"Turned on {device}"
 
         @self._server.tool()
         def turn_off(device: str) -> str:
-            """Turn off a device."""
+            """Turn off a device.
+
+            This is equivalent to turn_on with level=0.
+            """
             controller.turn_off(config.get(device))
             return f"Turned off {device}"
 
         @self._server.tool()
         def beep(device: str) -> str:
-            """Beep a device."""
+            """Beep a device.
+
+            This causes the device to make a short beeping sound once.
+            """
             controller.beep(config.get(device))
             return f"Beeped {device}"
 
     def run(self):
-        """Start the MCP server."""
         self._server.run(transport=self._transport,
-                         host=self._server_host,
-                         port=self._server_port)
+                         host=self._host,
+                         port=self._port)

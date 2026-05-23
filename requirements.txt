@@ -2,6 +2,7 @@ click
 fastapi
 fastmcp
 numpy
+openai-whisper
 ollama
 pyserial
 uvicorn

@@ -2,7 +2,7 @@ import json
 
 import click
 
-from insteon import InsteonConfiguration, InsteonController
+from insteon_ import InsteonConfiguration, InsteonController
 
 CONFIG_KEY = "config"
 CONTROLLER_KEY = "controller"

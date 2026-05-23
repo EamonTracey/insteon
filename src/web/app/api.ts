@@ -3,7 +3,7 @@ export class InsteonApiClient {
 
     async execute(audio: Blob): Promise<ExecuteResult> {
         const form = new FormData();
-        form.append('audio', audio, 'recording.webm');
+        form.append('audio', audio, 'audio.webm');
 
         const response = await fetch('execute', {
             method: 'POST',
