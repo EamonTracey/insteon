@@ -12,7 +12,7 @@ import {
 } from '@blueprintjs/core';
 import { Microphone } from '@blueprintjs/icons';
 
-import { InsteonApiClient, ExecuteResult } from './api';
+import { InsteonApiClient, ExecuteResponse } from './api';
 import styles from './App.module.css';
 
 const client = new InsteonApiClient();
@@ -22,7 +22,7 @@ type Status = 'requesting-permission' | 'ready' | 'recording' | 'processing' | '
 export default function App() {
     const [permissionGranted, setPermissionGranted] = useState(false);
     const [status, setStatus] = useState<Status>('requesting-permission');
-    const [result, setResult] = useState<ExecuteResult | null>(null);
+    const [response, setResponse] = useState<ExecuteResponse | null>(null);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
@@ -65,7 +65,7 @@ export default function App() {
             recorder.start();
             mediaRecorderRef.current = recorder;
 
-            setResult(null);
+            setResponse(null);
             setStatus('recording');
         } catch {
             setStatus('error');
@@ -101,9 +101,9 @@ export default function App() {
             setStatus('processing');
 
             const audioBlob = await stopRecording();
-            const executeResult = await client.execute(audioBlob);
+            const response = await client.execute(audioBlob);
 
-            setResult(executeResult);
+            setResponse(response);
             setStatus('ready');
         } catch (Error) {
             setStatus('error');
@@ -186,28 +186,29 @@ export default function App() {
                     {statusConfig.text}
                 </Tag>
 
-                {result && (
+                {response && (
                     <Callout
                         className={styles.result}
-                        intent={result.tool_calls.length > 0 ? Intent.PRIMARY : Intent.WARNING}
+                        intent={response.tool_calls.length > 0 ? Intent.PRIMARY : Intent.WARNING}
                     >
-                        <div className={styles.transcript}>
-                            <strong>Transcript:</strong>{' '}
-                            {result.transcript.trim() || 'No speech detected'}
+                        <div className={styles.prompt}>
+                            <strong>Prompt:</strong>{' '}
+                            {response.prompt.trim() || 'No speech detected'}
                         </div>
 
-                        {result.tool_calls.length > 0 ? (
+                        {response.tool_calls.length > 0 ? (
                             <div className={styles.history}>
                                 <strong>Actions:</strong>
-                                {result.tool_calls.map((toolCall, index) => (
+                                {response.tool_calls.map((toolCall, index) => (
                                     <Tag
-                                        key={`${toolCall.name}-${index}`}
+                                        key={`${toolCall.function.name}-${index}`}
                                         fill
                                         minimal
+                                        multiline
                                         intent={Intent.SUCCESS}
                                         className={styles.historyItem}
                                     >
-                                        {toolCall.name}({JSON.stringify(toolCall.arguments)})
+                                        {toolCall.function.name}({JSON.stringify(toolCall.function.arguments)})
                                     </Tag>
                                 ))}
                             </div>

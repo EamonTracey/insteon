@@ -1,4 +1,5 @@
 import json
+import threading
 from typing import Literal
 
 from fastmcp import FastMCP
@@ -21,6 +22,7 @@ class InsteonMcp:
         self._port = port
 
         controller = InsteonController(serial_port)
+        lock = threading.Lock()
 
         self._server = FastMCP("Eamon Insteon")
 
@@ -37,7 +39,8 @@ class InsteonMcp:
             A level of 127 turns the device on halfway.
             A level of 255 turns the device completely on.
             """
-            controller.turn_on(config.get(device), level)
+            with lock:
+                controller.turn_on(config.get(device), level)
             return f"Turned on {device}"
 
         @self._server.tool()
@@ -46,7 +49,8 @@ class InsteonMcp:
 
             This is equivalent to turn_on with level=0.
             """
-            controller.turn_off(config.get(device))
+            with lock:
+                controller.turn_off(config.get(device))
             return f"Turned off {device}"
 
         @self._server.tool()
@@ -55,7 +59,8 @@ class InsteonMcp:
 
             This causes the device to make a short beeping sound once.
             """
-            controller.beep(config.get(device))
+            with lock:
+                controller.beep(config.get(device))
             return f"Beeped {device}"
 
     def run(self):

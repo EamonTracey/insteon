@@ -47,7 +47,7 @@ class InsteonAgent:
     async def __aexit__(self, *args):
         await self._mcp.__aexit__(*args)
 
-    async def execute(self, prompt: str) -> bool:
+    async def execute(self, prompt: str):
         response = self._ollama.chat(
             model=self._model,
             messages=[

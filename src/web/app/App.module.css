@@ -32,7 +32,7 @@
     width: 100%;
 }
 
-.transcript {
+.prompt {
     margin-bottom: 0.75rem;
 }
 
@@ -44,7 +44,10 @@
 }
 
 .historyItem {
-    margin: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: block;
+    max-width: 100%;
 }
 
 .warning {

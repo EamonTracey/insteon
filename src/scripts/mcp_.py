@@ -25,7 +25,7 @@ def main(config: str, serial_port: str,
                         serial_port,
                         transport=transport,
                         host=host,
-                        server_port=port)
+                        port=port)
     server.run()
 
 

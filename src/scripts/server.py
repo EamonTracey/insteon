@@ -7,16 +7,14 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 import whisper
 
-from insteon_ import InsteonAgent
+from insteon import InsteonAgent
 
 DIST_DIR = "/dist"
 SSL_CERT = "/cert.pem"
 SSL_KEY = "/key.pem"
 
 model = whisper.load_model("small.en")
-agent = InsteonAgent("http://host.docker.internal:8000/sse",
-                     "gemma4",
-                     ollama_url="http://host.docker.internal:11434")
+agent = InsteonAgent(os.getenv("OLLAMA_HOST", ""), os.getenv("MCP_HOST", ""), "gemma4")
 
 
 @asynccontextmanager
@@ -34,9 +32,8 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/execute")
 async def execute(audio: UploadFile = File(...)):
     prompt = await transcribe_audio(audio)
-    await agent.execute(prompt)
-
-    return {"transcript": prompt, "tool_calls": []}
+    tool_calls = await agent.execute(prompt) or []
+    return {"prompt": prompt, "tool_calls": tool_calls}
 
 
 async def transcribe_audio(audio: UploadFile) -> str:

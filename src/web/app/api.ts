@@ -1,7 +1,7 @@
 export class InsteonApiClient {
     constructor() {}
 
-    async execute(audio: Blob): Promise<ExecuteResult> {
+    async execute(audio: Blob): Promise<ExecuteResponse> {
         const form = new FormData();
         form.append('audio', audio, 'audio.webm');
 
@@ -18,12 +18,14 @@ export class InsteonApiClient {
     }
 }
 
-export interface ToolCall {
-    name: string;
-    arguments: Record<string, unknown>;
+export interface ExecuteResponse {
+    prompt: string;
+    tool_calls: ToolCall[];
 }
 
-export interface ExecuteResult {
-    transcript: string;
-    tool_calls: ToolCall[];
+export interface ToolCall {
+    function: {
+        name: string,
+        arguments: Record<string, unknown>
+    }
 }
