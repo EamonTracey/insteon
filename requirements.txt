@@ -1,0 +1,8 @@
+click
+fastapi
+fastmcp
+numpy
+ollama
+pyserial
+uvicorn
+yapf

@@ -1,0 +1,12 @@
+services:
+  falmouth-agent:
+    build: .
+    ports:
+      - "443:443"
+    volumes:
+      - ./certs:/app/certs
+      - ./data:/app/data
+    devices: []
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1

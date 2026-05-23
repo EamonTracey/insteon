@@ -1,0 +1,24 @@
+{
+  "name": "insteon-web",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@blueprintjs/core": "^5.0.0",
+    "@blueprintjs/icons": "^5.23.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0"
+  }
+}
